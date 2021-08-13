@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 // wrap File object into a content provider
                 // required for API >= 24
                 // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-                Uri fileProvider = FileProvider.getUriForFile(MainActivity.this, "com.codepath.fileprovider", photoFile);
+                Uri fileProvider = FileProvider.getUriForFile(MainActivity.this, "com.codepath.fileprovider.Parstagram", photoFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
                 // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
@@ -106,14 +107,19 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Description Can Not Be Empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                if(photoFile == null || ivPostImage.getDrawable() == null)
+                {
+                    Toast.makeText(MainActivity.this, "There is no image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                savePost(description,currentUser);
+                savePost(description,currentUser, photoFile);
             }
 
-            private void savePost(String description, ParseUser currentUser) {
+            private void savePost(String description, ParseUser currentUser, File photoFile) {
                 Post post = new Post();
                 post.setDescription(description);
-                // post.setIamge();
+                post.setImage(new ParseFile(photoFile));
                 post.setUser(currentUser);
                 post.saveInBackground(new SaveCallback() {
                     @Override
@@ -124,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         Log.i(TAG,"Post save was successful");
                         etDescription.setText("");
+                        ivPostImage.setImageResource(0);
                     }
                 });
             }
@@ -147,5 +154,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == RESULT_OK)
+        {
+            Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+            ivPostImage.setImageBitmap(takenImage);
+        }
+        else
+            {
+                Toast.makeText(this,"Picture Was Not Taken!", Toast.LENGTH_SHORT).show();
+            }
     }
 }
