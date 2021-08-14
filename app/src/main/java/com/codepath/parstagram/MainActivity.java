@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-            private File getPhotoFileUri(String photoFileName) {
+            private File getPhotoFileUri(String fileName) {
                 // Get safe storage directory for photos
                 // Use `getExternalFilesDir` on Context to access package-specific directories.
                 // This way, we don't need to request external read/write runtime permissions.
@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this, "Error While Saving!", Toast.LENGTH_SHORT).show();
                         }
                         Log.i(TAG,"Post save was successful");
+                        Toast.makeText(MainActivity.this,"Post Successful", Toast.LENGTH_SHORT).show();
                         etDescription.setText("");
                         ivPostImage.setImageResource(0);
                     }
@@ -159,14 +160,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RESULT_OK)
-        {
-            Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-            ivPostImage.setImageBitmap(takenImage);
-        }
-        else
-            {
-                Toast.makeText(this,"Picture Was Not Taken!", Toast.LENGTH_SHORT).show();
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                ivPostImage.setImageBitmap(takenImage);
+                Toast.makeText(this,"Photo Creation Successful", Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Data Received in OnActivityResult");
+            } else {
+                Toast.makeText(this, "Picture Was Not Taken!", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error Retrieving Picture");
             }
+        }
     }
 }
